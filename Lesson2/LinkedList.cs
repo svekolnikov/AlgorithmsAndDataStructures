@@ -39,17 +39,11 @@ namespace Lesson2
                 throw new ArgumentNullException(nameof(node));
             }
 
-            if (node.NextNode == Tail)
-            {
-                AddNode(value);
-                return;
-            }                
+            Node newNode = new Node(value) { PrevNode = node, NextNode = node.NextNode };
 
-            Node newNode = new Node(value) { PrevNode = node, NextNode = node.NextNode }; // 1 2 3
+            node.NextNode = newNode;
 
-            node.NextNode = newNode; // 4
-
-            node.NextNode.PrevNode = newNode; // 5
+            node.NextNode.PrevNode = newNode; 
             
             _count++;
         }
@@ -109,11 +103,37 @@ namespace Lesson2
         public void RemoveNode(Node node)
         {
             Node currentNode = Head;
-            while(currentNode != null)
+            while (currentNode != null)
             {
+                if (currentNode == node)//Delete
+                {
+                    if (currentNode.NextNode != null)// not tail
+                    {
+                        currentNode.NextNode.PrevNode = currentNode.PrevNode;
+                    }
+                    else// tail
+                    {
+                        Tail = currentNode.PrevNode;
+                    }
+
+                    if (currentNode.PrevNode != null)// not head
+                    {
+                        currentNode.PrevNode.NextNode = currentNode.NextNode;
+                    }
+                    else// head
+                    {
+                        Head = currentNode.NextNode;
+                    }
+
+                    _count--;
+                    return;
+                }
 
                 currentNode = currentNode.NextNode;
             }
+
+            //Not found
+            throw new ArgumentOutOfRangeException();
         }
     }
 }
