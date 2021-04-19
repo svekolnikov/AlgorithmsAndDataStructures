@@ -7,126 +7,216 @@ namespace Lesson2
     public class Program
     {
         [Theory]
-        [InlineData(0, 0)]
-        [InlineData(1, 1)]
-        [InlineData(2, 2)]
-        [InlineData(3, 3)]
-        public void Test_GetCount(int expected, int addToList)
+        [MemberData(nameof(Test_Data_GetCount))]        
+        public void Test_GetCount(int expectedCount, int[] array)
         {
             //Arrange
             LinkedList linkedList = new LinkedList();
-            for (int i = 0; i < addToList; i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                linkedList.AddNode(1);
+                linkedList.AddNode(array[i]);
             }
 
             //Act
             int count = linkedList.GetCount();
 
             //Assert
-            Assert.Equal(expected, count);
+            Assert.Equal(expectedCount, count);
+            Node currentNode = linkedList.Head;
+            for (int i = 0; i < array.Length; i++)
+            {
+                Assert.Equal(array[i], currentNode.Value);
+                currentNode = currentNode.NextNode;
+            }
         }
 
-        [Fact]
-        public void Test_AddNode()
+        public static IEnumerable<object[]> Test_Data_GetCount()
         {
-            //Arrange
-            LinkedList linkedList = new LinkedList();
-
-            //Act
-            linkedList.AddNode(5);
-
-            //Assert
-            Assert.Equal(5, linkedList.Tail.Value);
-            Assert.Equal(1, linkedList.GetCount());
-        }
-
-        [Fact]
-        public void Test_AddNodeAfter()
-        {
-            //Arrange
-            LinkedList linkedList = new LinkedList();
-            linkedList.AddNode(0);
-            linkedList.AddNode(1);
-            linkedList.AddNode(2);
-            linkedList.AddNode(3);
-
-            Node nodeBefore1 = linkedList.FindValue(2);
-            Node nodeBefore2 = linkedList.FindValue(100);
-
-            //Act
-            linkedList.AddNodeAfter(nodeBefore1, 4);
-            int res = nodeBefore1.NextNode.Value;
-
-            Action act = () => linkedList.AddNodeAfter(nodeBefore2, 5);            
-
-            //Assert
-            Assert.Equal(4, res);
-            Assert.Throws<ArgumentNullException>(act);
-        }
-
-        [Fact]
-        public void Test_RemoveNode_index()
-        {
-            //Arrange
-            LinkedList linkedList = new LinkedList();
-            linkedList.AddNode(1);
-            linkedList.AddNode(2);
-            linkedList.AddNode(3);
-
-            //Act
-            Node res1 = linkedList.FindValue(2); // not null
-            linkedList.RemoveNode(1); // value = 2
-            Node res2 = linkedList.FindValue(2); // null
-
-            Action act = () => linkedList.RemoveNode(100); // Exception
-
-            //Assert
-            Assert.NotNull(res1);
-            Assert.Null(res2);
-            Assert.Equal(2, linkedList.GetCount());
-            Assert.Throws<ArgumentOutOfRangeException>(act);
-        }
-
-        [Fact]
-        public void Test_RemoveNode_value()
-        {
-            //Arrange
-            LinkedList linkedList = new LinkedList();
-            linkedList.AddNode(1);
-            linkedList.AddNode(2);
-            linkedList.AddNode(3);
-
-            //Act
-            Node res1 = linkedList.FindValue(2); // not null
-            linkedList.RemoveNode(res1); // value = 2
-            Node res2 = linkedList.FindValue(2); // null
-
-            Action act = () => linkedList.RemoveNode(100); // Exception
-
-            //Assert
-            Assert.NotNull(res1);
-            Assert.Null(res2);
-            Assert.Equal(2, linkedList.GetCount());
-            Assert.Throws<ArgumentOutOfRangeException>(act);
+            yield return new object[] { 5, new int[] { 1, 2, 3, 4, 5 } };
+            yield return new object[] { 0, new int[] { } };
         }
 
         [Theory]
-        [InlineData(-1, -1)]
-        [InlineData(0, 0)]
-        [InlineData(1, 1)]
-        public void Test_FindValue(int expected, int searchValue)
+        [MemberData(nameof(Test_Data_AddNode))]
+        public void Test_AddNode(int valueToAdd, int expectedCount, int[] initArray, int[] expectedArray)
         {
             //Arrange
             LinkedList linkedList = new LinkedList();
-            linkedList.AddNode(searchValue);
+            for (int i = 0; i < initArray.Length; i++)
+            {
+                linkedList.AddNode(initArray[i]);
+            }
 
-            //Act
-            var res = linkedList.FindValue(searchValue);
+            //Act            
+            linkedList.AddNode(valueToAdd);
 
             //Assert
-            Assert.NotNull(res);
-            Assert.Equal(expected, res.Value);
+            Assert.Equal(valueToAdd, linkedList.Tail.Value);
+            Assert.Equal(expectedCount, linkedList.GetCount());
+            Node currentNode = linkedList.Head;
+            for (int i = 0; i < expectedArray.Length; i++)
+            {
+                Assert.Equal(expectedArray[i], currentNode.Value);
+                currentNode = currentNode.NextNode;
+            }
+        }
+
+        public static IEnumerable<object[]> Test_Data_AddNode()
+        {
+            yield return new object[] { 5, 5, new int[] { 1, 2, 3, 4 }, new int[] { 1, 2, 3, 4, 5 } };
+        }
+
+        [Theory]
+        [MemberData(nameof(Test_Data_Test_AddNodeAfter))]
+        public void Test_AddNodeAfter(int findValue,int newValue, int[] initArray, int[] expectedArray)
+        {
+            //Arrange
+            LinkedList linkedList = new LinkedList();
+            for (int i = 0; i < initArray.Length; i++)
+            {
+                linkedList.AddNode(initArray[i]);
+            }
+
+            Node nodeBefore = linkedList.FindValue(findValue); // null if not found 
+
+            //Act
+            Action act = () => linkedList.AddNodeAfter(nodeBefore, newValue);
+
+            //Assert
+            if (!Array.Exists(initArray, x => x == findValue)) // if initArray not consist findValue => nodeBefore = null => ArgumentNullException
+            {
+                Assert.Throws<ArgumentNullException>(act);// Exception
+            }
+            else
+            {
+                act.Invoke();
+            }
+            Node currentNode = linkedList.Head;
+            for (int i = 0; i < expectedArray.Length; i++)
+            {
+                Assert.Equal(expectedArray[i], currentNode.Value);
+                currentNode = currentNode.NextNode;
+            }
+        }
+
+        public static IEnumerable<object[]> Test_Data_Test_AddNodeAfter()
+        {
+            yield return new object[] { 1, 7, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 7, 2, 3, 4, 5 } };
+            yield return new object[] { 3, 7, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 7, 4, 5 } };
+            yield return new object[] { 5, 7, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4, 5, 7 } };
+            yield return new object[] { 8, 7, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4, 5 } };
+        }
+
+        [Theory]
+        [MemberData(nameof(Test_Data_Test_RemoveNode_index))]
+        public void Test_RemoveNode_index(int indexToRemove, int[] initArray, int[] expectedArray)
+        {
+            //Arrange
+            LinkedList linkedList = new LinkedList();
+            for (int i = 0; i < initArray.Length; i++)
+            {
+                linkedList.AddNode(initArray[i]);
+            }
+
+            //Act
+            Action act = () => linkedList.RemoveNode(indexToRemove); 
+
+            //Assert
+            if(indexToRemove < 0 || indexToRemove > initArray.Length-1)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(act);// Exception
+            }                
+            else
+            {
+                act.Invoke();                
+            }
+
+            Node currentNode = linkedList.Head;
+            for (int i = 0; i < expectedArray.Length; i++)
+            {
+                Assert.Equal(expectedArray[i], currentNode.Value);
+                currentNode = currentNode.NextNode;
+            }
+        }
+
+        public static IEnumerable<object[]> Test_Data_Test_RemoveNode_index()
+        {
+            yield return new object[] { 0, new int[] { 1, 2, 3, 4, 5 }, new int[] { 2, 3, 4, 5 } };
+            yield return new object[] { 2, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 4, 5 } };
+            yield return new object[] { 4, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4 } };
+            yield return new object[] { 77, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4, 5 } };
+        }
+
+        [Theory]
+        [MemberData(nameof(Test_Data_Test_RemoveNode_value))]
+        public void Test_RemoveNode_value(int indexToRemove, int[] initArray, int[] expectedArray)
+        {
+            //Arrange
+            LinkedList linkedList = new LinkedList();
+            for (int i = 0; i < initArray.Length; i++)
+            {
+                linkedList.AddNode(initArray[i]);
+            }
+
+            //Act
+            Node node = linkedList.FindValue(indexToRemove); // not null
+            Action act = () => linkedList.RemoveNode(node);
+
+            //Assert
+            if (indexToRemove < 0 || indexToRemove > initArray.Length)
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(act);// Exception
+            }
+            else
+            {
+                act.Invoke();
+            }
+
+            Node currentNode = linkedList.Head;
+            for (int i = 0; i < expectedArray.Length; i++)
+            {
+                Assert.Equal(expectedArray[i], currentNode.Value);
+                currentNode = currentNode.NextNode;
+            }
+        }
+
+        public static IEnumerable<object[]> Test_Data_Test_RemoveNode_value()
+        {
+            yield return new object[] { 1, new int[] { 1, 2, 3, 4, 5 }, new int[] { 2, 3, 4, 5 } };
+            yield return new object[] { 3, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 4, 5 } };
+            yield return new object[] { 5, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4 } };
+            yield return new object[] { 77, new int[] { 1, 2, 3, 4, 5 }, new int[] { 1, 2, 3, 4, 5 } };
+        }
+
+        [Theory]
+        [MemberData(nameof(Test_Data_FindValue))]
+        public void Test_FindValue(object expectedValue, int searchValue, int[] array)
+        {
+            //Arrange
+            LinkedList linkedList = new LinkedList();
+            for (int i = 0; i < array.Length; i++)
+            {
+                linkedList.AddNode(array[i]);
+            }
+
+            //Act
+            Node res = linkedList.FindValue(searchValue);
+
+            //Assert;
+            if (expectedValue == null)
+            {
+                Assert.Null(res);
+            }
+            else
+            {
+                Assert.Equal((int)expectedValue, res.Value);
+            }
+        }
+
+        public static IEnumerable<object[]> Test_Data_FindValue()
+        {
+            yield return new object[] { 3, 3, new int[] { 0, 1, 2, 3, 4, 5 } };
+            yield return new object[] { null, 77, new int[] { 0, 1, 2, 3, 4, 5 } };
         }
 
         [Theory]
