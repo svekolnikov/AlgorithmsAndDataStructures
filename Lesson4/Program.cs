@@ -1,4 +1,4 @@
-﻿using System;
+﻿using BenchmarkDotNet.Running;
 
 namespace Lesson4
 {
@@ -6,6 +6,8 @@ namespace Lesson4
     {
         static void Main(string[] args)
         {
+            BenchmarkClass bm = new BenchmarkClass();
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }
