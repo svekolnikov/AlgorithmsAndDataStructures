@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace Lesson4
+namespace Lesson4_Search 
 {
     class Program
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Lesson4.BTree
+namespace Lesson4_BTree
 {
     public static class TreeHelper
     {

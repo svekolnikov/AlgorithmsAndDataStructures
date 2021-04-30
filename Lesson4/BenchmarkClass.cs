@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Lesson4
+namespace Lesson4_Search
 {
     public class BenchmarkClass
     {
@@ -56,7 +56,7 @@ namespace Lesson4
             return result;
         }
 
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

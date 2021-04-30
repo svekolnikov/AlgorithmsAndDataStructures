@@ -1,4 +1,4 @@
-﻿namespace Lesson4.BTree
+﻿namespace Lesson4_BTree
 {
     public class TreeNode
     {
@@ -9,8 +9,7 @@
 
         public override bool Equals(object obj)
         {
-            var node = obj as TreeNode;
-            if (node == null)
+            if (!(obj is TreeNode node))
                 return false;
             return node.Data == Data;
         }

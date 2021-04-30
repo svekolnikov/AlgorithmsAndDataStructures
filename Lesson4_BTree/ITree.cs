@@ -1,4 +1,4 @@
-﻿namespace Lesson4.BTree
+﻿namespace Lesson4_BTree
 {
     public interface ITree
     {
