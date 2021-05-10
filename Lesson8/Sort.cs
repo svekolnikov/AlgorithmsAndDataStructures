@@ -1,25 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lesson8
 {
     public static class Sort
     {
-        public static int[] BucketSort(int[] arr)
+        public static List<int> BucketSort(int[] arr)
         {
-            //Divide
+            if (arr == null) throw new ArgumentNullException(nameof(arr));
 
-            //BucketSort
+            List<int> sortedArr = new List<int>();
 
-            //Merge
+            //Buckets
+            var numBuckets = (int)Math.Ceiling(arr.Max() / 10.0f);
+            List<int>[] buckets = new List<int>[numBuckets];
 
+            for (int i = 0; i < numBuckets; i++)
+            {
+                buckets[i] = new List<int>();
+            }
 
-            return arr;
+            //Add to buckets
+            for (var i = 0; i < arr.Length; i++)
+            {
+                var numBucket = arr[i] / numBuckets;
+                buckets[numBucket].Add(arr[i]);
+            }
+
+            //Sort and merge
+            for (int i = 0; i < numBuckets; i++)
+            {
+                int[] temp = buckets[i].ToArray();
+                if (temp.Length > 0)
+                {
+                    QuickSort(temp, 0, temp.Length - 1);
+                    sortedArr.AddRange(temp);
+                }
+                
+            }
+
+            return sortedArr;
+        }
+        
+        public static void QuickSort(int[] array, int first, int last)
+        {
+            int i = first, j = last, x = array[(first + last) / 2];
+
+            do
+            {
+                while (array[i] < x)
+                    i++;
+
+                while (array[j] > x)
+                    j--;
+
+                if (i <= j)
+                {
+                    if (array[i] > array[j])
+                    {
+                        var tmp = array[i];
+                        array[i] = array[j];
+                        array[j] = tmp;
+                    }
+
+                    i++;
+                    j--;
+                }
+            } while (i <= j);
+
+            if (i < last)
+            {
+                QuickSort(array, i, last);
+            }
+
+            if (first < j)
+            {
+                QuickSort(array, first, j);
+            }
         }
 
+        public static int[] MergeSort(int[] array)
+        {
+            return MergeSort(array, 0, array.Length - 1);
+        }
 
-        public static void Merge(int[] array, int lowIndex, int middleIndex, int highIndex)
+        private static void Merge(int[] array, int lowIndex, int middleIndex, int highIndex)
         {
             var left = lowIndex;
             var right = middleIndex + 1;
@@ -60,7 +128,7 @@ namespace Lesson8
             }
         }
 
-        public static int[] MergeSort(int[] array, int lowIndex, int highIndex)
+        private static int[] MergeSort(int[] array, int lowIndex, int highIndex)
         {
             if (lowIndex < highIndex)
             {
@@ -84,10 +152,6 @@ namespace Lesson8
 
             return array;
         }
-
-        public static int[] MergeSort(int[] array)
-        {
-            return MergeSort(array, 0, array.Length - 1);
-        }
+        
     }
 }
